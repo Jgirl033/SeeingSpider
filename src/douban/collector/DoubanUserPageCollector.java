@@ -8,11 +8,16 @@ package douban.collector;
 import common.collector.PageCollector;
 import static common.constant.Constant.doubanDR;
 import common.file.Writer;
+import douban.entity.DoubanCollect;
+import douban.entity.DoubanWish;
+import douban.spider.DoubanUserSpider;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.openqa.selenium.TimeoutException;
 
 /**
@@ -74,4 +79,76 @@ public class DoubanUserPageCollector extends PageCollector {
             Logger.getLogger(DoubanUserPageCollector.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
+     public void downloadUserMoviePage() {
+
+        ArrayList<String> midUrlList = new ArrayList<>();
+        for (String uid : this.uidList) {
+
+            DoubanUserSpider doubanUserSpider = new DoubanUserSpider(uid);
+            ArrayList<DoubanCollect> collectMovieList = doubanUserSpider.getCollectMovie();
+            for (DoubanCollect dbc : collectMovieList) {
+                if (dbc.getOneUrl() != null) {
+                    midUrlList.add(dbc.getOneUrl());
+                }
+                if (dbc.getTwoUrl() != null) {
+                    midUrlList.add(dbc.getTwoUrl());
+                }
+                if (dbc.getThreeUrl() != null) {
+                    midUrlList.add(dbc.getThreeUrl());
+                }
+                if (dbc.getFourUrl() != null) {
+                    midUrlList.add(dbc.getFourUrl());
+                }
+                if (dbc.getFiveUrl() != null) {
+                    midUrlList.add(dbc.getFiveUrl());
+                }
+            }
+
+            ArrayList<DoubanWish> wishMovieList = doubanUserSpider.getWishMovie();
+            for (DoubanWish dbw : wishMovieList) {
+                if (dbw.getOneUrl() != null) {
+                    midUrlList.add(dbw.getOneUrl());
+                }
+                if (dbw.getTwoUrl() != null) {
+                    midUrlList.add(dbw.getTwoUrl());
+                }
+                if (dbw.getThreeUrl() != null) {
+                    midUrlList.add(dbw.getThreeUrl());
+                }
+                if (dbw.getFourUrl() != null) {
+                    midUrlList.add(dbw.getFourUrl());
+                }
+                if (dbw.getFiveUrl() != null) {
+                    midUrlList.add(dbw.getFiveUrl());
+                }
+            }
+
+        }
+        
+        HashSet<String> set = new HashSet<>(midUrlList);
+        ArrayList<String> midUrlSet = new ArrayList<>(set);
+
+        ArrayList<String> finishedMidUrlSet = new ArrayList<>();
+        File[] dir = new File("doc/server/douban/movie/").listFiles();
+        for (File file : dir) {
+            String mid = file.getName().replace(".txt", "");
+            System.out.println(mid);
+            finishedMidUrlSet.add(mid);
+        }
+        midUrlSet.removeAll(finishedMidUrlSet);
+
+        for (String midUrl : midUrlSet) {
+            String mid = "";
+            Pattern pattern = Pattern.compile("https://movie.douban.com/subject/(.*?)/");
+            Matcher matcher = pattern.matcher(midUrl);
+            if (matcher.find()) {
+                mid = matcher.group(1).trim();
+            }
+            DoubanMoviePageCollector movieCollector = new DoubanMoviePageCollector(mid);
+            movieCollector.downloadPage();
+        }
+    }
+    
+    
 }
