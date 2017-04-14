@@ -133,8 +133,8 @@ public class DoubanUserPageCollector extends PageCollector {
         File[] dir = new File("doc/server/douban/movie/").listFiles();
         for (File file : dir) {
             String mid = file.getName().replace(".txt", "");
-            System.out.println(mid);
-            finishedMidUrlSet.add(mid);
+            String midUrl = "https://movie.douban.com/subject/"+mid+"/";
+            finishedMidUrlSet.add(midUrl);
         }
         midUrlSet.removeAll(finishedMidUrlSet);
 
