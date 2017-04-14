@@ -8,6 +8,7 @@ package douban.util;
 import common.entity.Comment;
 import common.entity.Movie;
 import common.entity.User;
+import common.util.DBConnector;
 import common.util.DBOperator;
 import douban.entity.DoubanComment;
 import douban.entity.DoubanMovie;
@@ -35,7 +36,7 @@ public class DoubanDBOperator extends DBOperator {
      */
     public DoubanDBOperator() {
         this.database = "downloader";
-        this.dbc = new DoubanDBConnector().getDBConnection();
+        this.dbc = new DBConnector().getDBConnection();
     }
 
     /**
@@ -137,7 +138,7 @@ public class DoubanDBOperator extends DBOperator {
                 System.out.println("插入movie表成功");
             }
         } catch (Exception ex) {
-            Logger.getLogger(DoubanDBConnector.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(DoubanDBOperator.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -174,7 +175,7 @@ public class DoubanDBOperator extends DBOperator {
             }
             prest.executeBatch();
         } catch (SQLException ex) {
-            Logger.getLogger(DoubanDBConnector.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(DoubanDBOperator.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -183,13 +184,14 @@ public class DoubanDBOperator extends DBOperator {
      *
      * @param userList 某部电影发表短评的用户列表
      */
+    @Override
     public void saveUser(ArrayList<User> userList) {
-        
+
         ArrayList<DoubanUser> doubanUserList = new ArrayList<>();
-        for (User user : userList){
-            doubanUserList.add((DoubanUser)user);
+        for (User user : userList) {
+            doubanUserList.add((DoubanUser) user);
         }
-        
+
         try {
             String insql;
             insql = "REPLACE INTO  `" + this.database + "`.`douban_user` (`uid` ,`name` ,`source`,`area`) VALUES (?,?,?,?);";
