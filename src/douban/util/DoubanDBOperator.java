@@ -10,9 +10,12 @@ import common.entity.Movie;
 import common.entity.User;
 import common.util.DBConnector;
 import common.util.DBOperator;
+import douban.entity.DoubanCollect;
 import douban.entity.DoubanComment;
 import douban.entity.DoubanMovie;
 import douban.entity.DoubanUser;
+import douban.entity.DoubanWish;
+import douban.spider.DoubanUserSpider;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -20,6 +23,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 数据库插入类
@@ -208,5 +213,99 @@ public class DoubanDBOperator extends DBOperator {
         } catch (Exception ex) {
             Logger.getLogger(DoubanDBOperator.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    
+    public void saveUserMovie(ArrayList<User> userList) {
+
+        for (User user : userList) {
+            DoubanUser doubanUser = (DoubanUser) user;
+            String uid = doubanUser.getUid();
+            DoubanUserSpider doubanUserSpider = new DoubanUserSpider(uid);
+            String collectMovieStr = "";
+            String wishMovieStr = "";
+            ArrayList<DoubanCollect> collectMovieList = doubanUserSpider.getCollectMovie();
+            Pattern pattern = Pattern.compile("https://movie.douban.com/subject/(.*?)/");
+            for (DoubanCollect t : collectMovieList) {
+                if (t.getOneUrl() != null) {
+                    Matcher matcher = pattern.matcher(t.getOneUrl());
+                    if (matcher.find()) {
+                        collectMovieStr += matcher.group(1).trim() + "/";
+                    }
+                }
+                if (t.getTwoUrl() != null) {
+                    Matcher matcher = pattern.matcher(t.getTwoUrl());
+                    if (matcher.find()) {
+                        collectMovieStr += matcher.group(1).trim() + "/";
+                    }
+                }
+                if (t.getThreeUrl() != null) {
+                    Matcher matcher = pattern.matcher(t.getThreeUrl());
+                    if (matcher.find()) {
+                        collectMovieStr += matcher.group(1).trim() + "/";
+                    }
+                }
+                if (t.getFourUrl() != null) {
+                    Matcher matcher = pattern.matcher(t.getFourUrl());
+                    if (matcher.find()) {
+                        collectMovieStr += matcher.group(1).trim() + "/";
+                    }
+                }
+                if (t.getFive() != null) {
+                    Matcher matcher = pattern.matcher(t.getFive());
+                    if (matcher.find()) {
+                        collectMovieStr += matcher.group(1).trim() + "/";
+                    }
+                }
+            }
+
+            ArrayList<DoubanWish> wishMovieList = doubanUserSpider.getWishMovie();
+            for (DoubanWish t : wishMovieList) {
+                if (t.getOneUrl() != null) {
+                    Matcher matcher = pattern.matcher(t.getOneUrl());
+                    if (matcher.find()) {
+                        wishMovieStr += matcher.group(1).trim() + "/";
+                    }
+                }
+                if (t.getTwoUrl() != null) {
+                    Matcher matcher = pattern.matcher(t.getTwoUrl());
+                    if (matcher.find()) {
+                        wishMovieStr += matcher.group(1).trim() + "/";
+                    }
+                }
+                if (t.getThreeUrl() != null) {
+                    Matcher matcher = pattern.matcher(t.getThreeUrl());
+                    if (matcher.find()) {
+                        wishMovieStr += matcher.group(1).trim() + "/";
+                    }
+                }
+                if (t.getFourUrl() != null) {
+                    Matcher matcher = pattern.matcher(t.getFourUrl());
+                    if (matcher.find()) {
+                        wishMovieStr += matcher.group(1).trim() + "/";
+                    }
+                }
+                if (t.getFive() != null) {
+                    Matcher matcher = pattern.matcher(t.getFive());
+                    if (matcher.find()) {
+                        wishMovieStr += matcher.group(1).trim() + "/";
+                    }
+                }
+            }
+
+            try {
+                String insql;
+                insql = "INSERT INTO  `" + this.database + "`.`douban_user_movie` (`uid` ,`wish` ,`collect`) VALUES (?,?,?);";
+                PreparedStatement ps = this.dbc.prepareStatement(insql);
+                ps.setString(1, doubanUser.getUid());
+                ps.setString(2, wishMovieStr);
+                ps.setString(3, collectMovieStr);
+                ps.execute();
+            } catch (Exception ex) {
+                Logger.getLogger(DoubanDBOperator.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }
+
     }
 }
