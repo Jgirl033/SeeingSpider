@@ -58,6 +58,7 @@ public class DoubanSaver {
             dbi.saveMovie(m);
             dbi.saveUser(doubanUserList);
             dbi.saveComment(commentList);
+            dbi.saveUserMovie(doubanUserList);
         }
     }
 }
